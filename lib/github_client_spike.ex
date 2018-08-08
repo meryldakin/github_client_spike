@@ -19,13 +19,13 @@ defmodule GithubClientSpike do
     team_name = "authors"
     {_status, teams, _resp} = Tentacat.Organizations.Teams.list(@client, org_name)
 
-    team = Enum.find(teams, fn team -> team["name"] == team_name end)
-    get_team_id(%{org_name: org_name, team_name: team_name}, team)
+    Enum.find(teams, fn team -> team["name"] == team_name end)
+    |> get_team_id(%{org_name: org_name, team_name: team_name})
   end
 
-  def get_team_id(%{org_name: _, team_name: _}, %{"id" => id}), do: id
+  def get_team_id(%{"id" => id}, %{org_name: _, team_name: _}), do: id
 
-  def get_team_id(%{org_name: org_name, team_name: team_name}, _) do
+  def get_team_id(_, %{org_name: org_name, team_name: team_name}) do
     params = %{"name" => team_name, "private" => "closed"}
     {_status, %{"id" => id}, _resp } = Tentacat.Organizations.Teams.create(@client, org_name, params)
     id
