@@ -1,41 +1,43 @@
 defmodule GithubClientSpike do
-  @moduledoc """
-  Documentation for GithubClientSpike.
-  """
+  @access_token System.get_env("GHE_TOKEN")
+  @url "https://gh.learn.co/api/v3/"
+  @client Tentacat.Client.new(%{access_token: @access_token}, @url)
+
+  def client, do: @client
 
   @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> GithubClientSpike.hello
-      :world
-
+  # https://developer.github.com/enterprise/2.14/v3/orgs/#get-an-organization
   """
-  def hello do
-    :world
+  def find_organization(org_name) do
+    Tentacat.Organizations.find @client, org_name
   end
 
-  def client do
-    Tentacat.Client.new(%{access_token: access_token}, url)
+  @doc """
+  https://developer.github.com/enterprise/2.14/v3/teams/#create-team
+  """
+  def find_or_create_team(org_name) do
+    team_name = "authors"
+    {_status, teams, _resp} = Tentacat.Organizations.Teams.list(@client, org_name)
+
+    team = Enum.find(teams, fn team -> team["name"] == team_name end)
+    get_team_id(%{org_name: org_name, team_name: team_name}, team)
   end
 
-  # the syntax for passing in the map as the second arg is not quite correct, still
-  # working on it
-  def find_or_create_team(organization_name, %{
-    "description" => "description",
-    "name" => "name",
-    "privacy" => "privacy",
-    "repo_names" => "repo_names"
-    } = body) do
-    Tentacat.Organizations.Teams.create(client, organization_name, body)
+  def get_team_id(%{org_name: _, team_name: _}, %{"id" => id}), do: id
+
+  def get_team_id(%{org_name: org_name, team_name: team_name}, _) do
+    params = %{"name" => team_name, "private" => "closed"}
+    {_status, %{"id" => id}, _resp } = Tentacat.Organizations.Teams.create(@client, org_name, params)
+    id
   end
 
-  def access_token do
-    # add token here
+  def add_member_to_team(team_id) do
+    IO.puts(team_id)
   end
 
-  def url do
-    "https://gh.learn.co/api/v3/"
+  def run do
+    find_or_create_team("DEV-learn-co-students")
+    |> add_member_to_team
   end
+
 end
