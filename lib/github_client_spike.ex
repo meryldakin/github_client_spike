@@ -40,4 +40,9 @@ defmodule GithubClientSpike do
     |> add_member_to_team
   end
 
+  def clone do
+    System.cmd("git", ["clone", "git@github.com:alexgriff/hidden_phrase_frontend.git", "temp/#{DateTime.utc_now}"])
+  end
+
+
 end
