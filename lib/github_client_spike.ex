@@ -31,13 +31,13 @@ defmodule GithubClientSpike do
     id
   end
 
-  def add_member_to_team(team_id) do
-    IO.puts(team_id)
+  def add_member_to_team(team_id, username, options \\ %{}) do
+    Tentacat.Teams.Members.create(client, team_id, username, options)
   end
 
-  def run do
+  def run(username) do
     find_or_create_team("DEV-learn-co-students")
-    |> add_member_to_team
+    |> add_member_to_team(username)
   end
 
   def clone do
