@@ -19,6 +19,10 @@ defmodule Git do
     callback.(output)
   end
 
+  def repo_command(repo, cli_args, repo_attributes \\ %{}) do
+    command(cli_args, cd(repo), fn _-> repo_callback(repo, repo_attributes) end)
+  end
+
   defp create_timestamp do
     DateTime.utc_now
     |> DateTime.to_string
@@ -31,17 +35,15 @@ defmodule Git do
   end
 
   def rm_origin(repo) do
-    command(["remote", "rm", "origin"], [cd: repo.path], fn _-> %Git.Repo{repo | remote: nil } end)
+    repo_command(repo, ["remote", "rm", "origin"], %{remote: nil})
   end
 
   def add_origin(repo, remote) do
-    command(["remote", "add", "origin", remote], [cd: repo.path], fn _-> %Git.Repo{repo | remote: remote} end)
+    repo_command(repo, ["remote", "add", "origin", remote], %{remote: remote})
   end
 
-  # git push -u origin master
-
-  def push(repo) do
-    command(["push", "-u", "origin", "master"], [cd: repo.path], fn _-> repo end)
+  def push(repo, args \\ []) do
+    repo_command(repo, ["push"] ++ args)
   end
 
   defp append_dot_learn_data(repo, lesson) do
@@ -59,11 +61,30 @@ defmodule Git do
     "\nlesson_uuid: #{lesson}"
   end
 
+  def add(repo) do
+    repo_command(repo, ["add", ".learn"])
+  end
+
+  def cd(repo) do
+    [cd: repo.path]
+  end
+
+  def commit(repo, message) do
+    repo_command(repo, ["commit", "-m", message])
+  end
+
+  def repo_callback(repo, props) do
+    Map.merge(repo, props)
+  end
+
   def test do
     clone("git@github.com:alexgriff/hidden_phrase_frontend.git")
     |> rm_origin
     |> add_origin("git@github.com:johann/beef.git")
-    |> push
+    |> push(["-u", "origin", "master", "--force"])
     |> append_dot_learn_data("345")
+    |> add
+    |> commit("append lesson data to .learn")
+    |> push
   end
 end
