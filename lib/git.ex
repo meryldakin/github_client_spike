@@ -14,6 +14,11 @@ defmodule Git do
     callback.(output)
   end
 
+  def command(cli_args, options, callback) do
+    output = System.cmd("git", cli_args, options)
+    callback.(output)
+  end
+
   def create_timestamp do
     DateTime.utc_now
     |> DateTime.to_string
@@ -25,22 +30,11 @@ defmodule Git do
     "#{@repo_path}/#{timestamp}"
   end
 
-  def cd(repo) do
-    x = System.cmd("cd", [repo.path, "&&", "git", "remote", "-v"])
-    IO.puts("PATTHHHHHHHH")
-    IO.puts(repo.path)
-    IO.puts("IN CD")
-    IO.inspect(x)
+  def rm_origin(repo) do
+    command(["remote", "rm", "origin"], [cd: repo.path], fn _-> %Git.Repo{repo | remote: nil } end)
   end
 
-  def rm_origin(repo) do
-    cd(repo)
-    x = System.cmd("pwd", [])
-    IO.puts("IN RM_ORIGIN")
-    IO.inspect(x)
-    z = System.cmd("git", ["remote", "-v"])
-    IO.inspect(z)
-  end
+
 
 
   def test do
