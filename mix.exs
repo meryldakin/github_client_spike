@@ -21,8 +21,7 @@ defmodule GithubClientSpike.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:tentacat, "~> 1.0"},
-      {:geef, path: "./geef"}
+      {:tentacat, "~> 1.0"}
       # {:dep_from_hexpm, "~> 0.3.0"},
     ]
   end

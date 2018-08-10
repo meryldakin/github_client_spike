@@ -48,6 +48,10 @@ defmodule GithubClientSpike do
     Tentacat.Teams.Members.create(client, team_id, username, options)
   end
 
+  def create_repo(repo_name) do
+    Tentacat.Repositories.create(client, repo_name)
+  end
+
   def run(username) do
     find_or_create_team("DEV-learn-co-students")
     |> add_member_to_team(username)
